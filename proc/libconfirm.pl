@@ -634,8 +634,8 @@ sub BufferSyntax
 
     &Log("BufferSyntax::{$buffer}\n") if $debug_confirm;
 
-    $ml = $*;
-    $*  = 1;
+    # $ml = $*;
+    # $*  = 1;
 
     if ($buffer =~ /$CONFIRMATION_SUBSCRIBE\s+(\S+.*)/) { # require anything;
 	$name = $1;
@@ -666,7 +666,8 @@ sub BufferSyntax
 	$name = $NULL;
     }
 
-    if (! $name) { $* =$ml; return $NULL;}
+    # if (! $name) { $* =$ml; return $NULL;}
+    if (! $name) { return $NULL;}
 
     if ($buffer =~ /\@/) {
 	&Mesg(*e, &GenConfirmReplyText(*e, *cf, 'BufferSyntax::InvalidAddr'));
@@ -679,7 +680,7 @@ sub BufferSyntax
 	; # do nothing
     }
 
-    $* =$ml;
+    # $* =$ml;
     $name;
 }
 

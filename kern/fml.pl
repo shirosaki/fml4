@@ -690,7 +690,7 @@ sub GetFieldsFromHeader
 
     ### Header Fields Extraction
     $s = $Envelope{'Header'}."\n";
-    $* = 0;			# match one line
+    # $* = 0;			# match one line
     if ($s =~ /^From\s+(\S+)/i) {
 	# XXX NO REACH HERE (1999/10/27 by fukachan)
 	# $Envelope{'UnixFrom'} = $UnixFrom = $1;

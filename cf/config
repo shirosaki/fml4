@@ -17,8 +17,8 @@
 $ERROR_LOG = "etc/motd.error";
 unlink $ERROR_LOG if -f $ERROR_LOG;
 
-require 'getopts.pl';
-&Getopts("m:hdDr:csnfrFiI:v");
+use Getopt::Std;
+getopts('m:hdDr:csnfrFI:v');
 
 $no_dns  = $opt_n;
 $debug   = $opt_d;
@@ -657,10 +657,10 @@ sub main'reverse
 	    if (defined $entry) {
 		print STDERR "GO \$\t$key\n";
 	    }
-	    elsif (defined @entry) {
+	    elsif (@entry) {
 		print STDERR "GO \@\t$key\n";
 	    }
-	    elsif (defined %entry) {
+	    elsif (%entry) {
 		print STDERR "GO \%\t$key\n";
 	    }
 	    elsif (defined &entry) {
@@ -703,7 +703,7 @@ sub main'reverse
 	    next;
 	}
 
-	if (defined @entry) {
+	if (@entry) {
 	    undef $num;
 	    $OUT'LOCAL .=  "\@$key = (";
 	    foreach (@entry) {
@@ -718,7 +718,7 @@ sub main'reverse
 	# Is there an associative array that isn't the one
 	# we're currently iterating through?
 	
-	if ($key ne "_$package" && defined %entry) {
+	if ($key ne "_$package" && %entry) {
 	    $OUT'LOCAL .= "\%$key = (\n"; #';
 	    foreach $key (sort keys(%entry)) {
 		$OUT'LOCAL .= "'$key', '". $entry{$key} ."',\n";#';
@@ -791,10 +791,10 @@ sub rv'PreScanConfigPH #';
 	if (defined $entry) {
 	    eval("$rv'\$$key = 1; undef $rv'\$$key");
 	}
-	elsif (defined @entry) {
+	elsif (@entry) {
 	    eval("$rv'\@$key = 1; undef $rv'\@$key");
 	}
-	elsif ($key ne "_$package" && $key ne "_DB" && defined %entry) {
+	elsif ($key ne "_$package" && $key ne "_DB" && %entry) {
 	    eval("$rv'\%$key = 1; undef $rv'\%$key");
 	}
 	else {

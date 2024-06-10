@@ -97,7 +97,7 @@ sub new
 {
     my ($self, $cfargs) = @_;
 
-    unless (defined %_fml_config) { %_fml_config = ( _pid => $$ );}
+    unless (%_fml_config) { %_fml_config = ( _pid => $$ );}
 
     # prepare the tied hash to %_fml_config;
     # to support $config->{ variable } syntax.
@@ -105,7 +105,7 @@ sub new
     tie %$me, $self;
 
     # import variables
-    if (defined $cfargs) {
+    if (defined($cfargs)) {
 	my ($k, $v);
 	while (($k, $v) = each %$cfargs) {
 	    set($me, $k, $v);
@@ -144,8 +144,8 @@ sub get
 {
     my ($self, $key) = @_;
 
-    if (defined $key) {
-	if (defined $self->{ $key }) {
+    if (defined($key)) {
+	if (defined($self->{ $key })) {
 	    return $self->{ $key };
 	}
     }
@@ -184,7 +184,7 @@ sub set
 {
     my ($self, $key, $value) = @_;
 
-    if (defined $key && defined $value) {
+    if (defined($key) && defined($value)) {
 	$self->{ $key } = $value;
 	$need_expansion_variables = 1;
 
@@ -285,7 +285,7 @@ sub _read_file
     use FileHandle;
     my $fh = new FileHandle $file;
 
-    if (defined $fh) {
+    if (defined($fh)) {
 	my ($key, $value, $curkey, $comment_buffer);
 	my ($after_cut, $hook, $buf);
 	my $name_space = ''; # by default
@@ -364,7 +364,7 @@ sub _read_file
 
 	# save hook configuration in FML::Config name space (global).
 	# XXX Each hook continues to grow when new codes are given.
-	$_fml_user_hooks .= $hook if defined $hook;
+	$_fml_user_hooks .= $hook if defined($hook);
     }
     else {
 	$self->error_set("Error: cannot open $file");
@@ -438,7 +438,7 @@ sub _evaluate
     my @buf = ();
 
     if ($name_space) {
-	if (defined $config->{ $name_space }->{ $key }) {
+	if (defined($config->{ $name_space }->{ $key })) {
 	    my $x = $config->{ $name_space }->{ $key };
 	    $x    =~ s/^\s*//;
 	    $x    =~ s/\s*$//;
@@ -446,7 +446,7 @@ sub _evaluate
 	}
     }
     else {
-	if (defined $config->{ $key }) {
+	if (defined($config->{ $key })) {
 	    my $x = $config->{ $key };
 	    $x    =~ s/^\s*//;
 	    $x    =~ s/\s*$//;
@@ -465,7 +465,7 @@ sub _evaluate
 
       BUF:
 	for my $s (@buf) {
-	    next BUF unless defined $s;
+	    next BUF unless defined($s);
 	    next BUF unless $s;
 	    push(@newbuf, $s) if $value ne $s;
 	}
@@ -522,7 +522,7 @@ sub read
 	while (($k, $v) = each %$config) {
 	    print STDERR "\nconfig{ $k } =>\n";
 	    print STDERR "          $v\n";
-	    if (defined $comment->{ $k }) {
+	    if (defined($comment->{ $k })) {
 		my $comment = $comment->{ $k };
 		print STDERR " comment\n{$comment}\n";
 	    }
@@ -560,7 +560,7 @@ sub write
     }
 
     # 3. write config
-    if (defined $fh) {
+    if (defined($fh)) {
 	$fh->autoflush(1);
 
 	# XXX-TODO: it works well ?
@@ -568,14 +568,14 @@ sub write
 	# XXX get variable list modified in this process
 	my $newkeys = $self->{ _newly_added_keys };
 	for my $k (@$order, @$newkeys) {
-	    if ($debug && defined $comment->{$k}) {
+	    if ($debug && defined($comment->{$k})) {
 		print STDERR "write.config{ ", $comment->{$k}, " }";
 		print STDERR join("\n\t", split(/\s+/, $config->{$k})), "\n";
 	    }
 
-	    print $fh $comment->{$k} if defined $comment->{$k};
+	    print $fh $comment->{$k} if defined($comment->{$k});
 	    print $fh "$k = ";
-	    if (defined $config->{$k}) {
+	    if (defined($config->{$k})) {
 		print $fh join("\n\t", split(/\s+/, $config->{$k}));
 	    }
 	    print $fh "\n";
@@ -685,7 +685,7 @@ sub _expand_variables
     # check whether the variable definition is recursive.
     # For example, definition "var_a = $var_a/b/c" causes a loop.
     for my $x ( @order ) {
-	if (defined $config->{ $x } &&
+	if (defined($config->{ $x }) &&
 	    $config->{ $x } =~ /\$$x/) {
 	    croak("loop1: definition of $x is recursive\n");
 	}
@@ -696,7 +696,7 @@ sub _expand_variables
     my $max = 0;
   KEY:
     for my $x ( @order ) {
-	next KEY unless defined $config->{ $x };
+	next KEY unless defined($config->{ $x });
 	next KEY if $config->{ $x } !~ /\$/o;
 
 	# we need a loop to expand nested variables, for example,
@@ -709,18 +709,18 @@ sub _expand_variables
 
 	    # expand $prefix -> something
 	    $config->{$x} =~
-		s/\$([a-z_]+[a-z0-9])/(defined $config->{$1} ?
+		s/\$([a-z_]+[a-z0-9])/(defined($config->{$1}) ?
 				       $config->{$1} :
-				       (defined $hints->{$1} ?
+				       (defined($hints->{$1}) ?
 					$hints->{$1} :
 					''
 					))/ge;
 
 	    # expand ${prefix} -> something
 	    $config->{$x} =~
-		s/\$\{([a-z_]+[a-z0-9])\}/(defined $config->{$1} ?
+		s/\$\{([a-z_]+[a-z0-9])\}/(defined($config->{$1}) ?
 				       $config->{$1} :
-				       (defined $hints->{$1} ?
+				       (defined($hints->{$1}) ?
 					$hints->{$1} :
 					''
 					))/ge;
@@ -750,9 +750,9 @@ sub __expand_special_macros
 {
     my ($config, $x) = @_;
 
-    return unless defined $config;
-    return unless defined $x;
-    return unless defined $config->{ $x };
+    return unless defined($config);
+    return unless defined($x);
+    return unless defined($config->{ $x });
 
     if ($config->{ $x } =~ /READ_ONLY\((.*)\)/) {
 	my (@x) = split(/\s+/, $1);
@@ -789,11 +789,11 @@ sub expand_variable_in_buffer
 
 	my $varname = $1;
 
-	if (defined $config->{ $varname } && $config->{ $varname }) {
+	if (defined($config->{ $varname }) && $config->{ $varname }) {
 	    my $x = $config->{ $varname };
 	    $$rbuf =~ s/\$$varname/$x/g;
 	}
-	if (defined $cfargs->{ $varname } && $cfargs->{ $varname }) {
+	if (defined($cfargs->{ $varname }) && $cfargs->{ $varname }) {
 	    my $x = $cfargs->{ $varname };
 	    $$rbuf =~ s/\$$varname/$x/g;
 	}
@@ -826,7 +826,7 @@ sub yes
 {
     my ($self, $key) = @_;
 
-    if (defined $_fml_config{$key}) {
+    if (defined($_fml_config{$key})) {
 	$_fml_config{$key} =~ /^yes$/i ? 1 : 0;
     }
     else {
@@ -843,7 +843,7 @@ sub no
 {
     my ($self, $key) = @_;
 
-    if (defined $_fml_config{$key}) {
+    if (defined($_fml_config{$key})) {
 	$_fml_config{$key} =~ /^no$/i ? 1 : 0;
     }
     else {
@@ -862,14 +862,14 @@ sub has_attribute
     my ($self, $key, $attribute) = @_;
 
     # sanity
-    return 0 unless defined $attribute;
+    return 0 unless defined($attribute);
 
-    if (defined $_fml_config_result{$key}) {
+    if (defined($_fml_config_result{$key})) {
 	my (@attribute) = split(/\s+/, $_fml_config_result{$key});
 
       ATTR:
 	for my $k (@attribute) {
-	    next ATTR unless defined $k;
+	    next ATTR unless defined($k);
 
 	    return 1 if $k eq $attribute;
 	}
@@ -921,7 +921,7 @@ sub dump_variables
 	# compare the value with the default one
 	# print key if values for the key differs.
 	else {
-	    if (defined $_default_fml_config{ $k }) {
+	    if (defined($_default_fml_config{ $k })) {
 		if ($v ne $_default_fml_config{ $k }) {
 		    printf $format, $k, $v;
 		}
@@ -1004,7 +1004,7 @@ sub get_hook
 {
     my ($self, $hook_name) = @_;
 
-    return undef unless defined $_fml_user_hooks;
+    return undef unless defined($_fml_user_hooks);
     return undef unless $_fml_user_hooks;
 
     my $eval = qq{
@@ -1107,11 +1107,11 @@ sub STORE
 
     # inform fml we need to expand variable again when FETCH() is
     # called.
-    if (defined $value && $value =~ /\$/) {
+    if (defined($value) && $value =~ /\$/) {
 	$need_expansion_variables = 1;
     }
 
-    if (defined $key && defined $value) {
+    if (defined($key) && defined($value)) {
 	$_fml_config{$key} = $value;
     }
 }

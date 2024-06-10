@@ -430,7 +430,7 @@ sub FmlLocalSearchMatch
     local(@pat) = split(/\n/, $s);
 
     # for multiple lines. the entry to match is within "one line"
-    $* = 0;
+    # $* = 0;
 
     # compare %Envelope patterns given by "rc" entry ($s)
     foreach $pat (@pat) {

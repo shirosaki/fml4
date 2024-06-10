@@ -31,8 +31,8 @@ sub __EnvelopeFilter
     $bodylen = length($e{'Body'}); # body length
 
     # force plural line match
-    $org_mlp = $*;
-    $* = 0;
+    # $org_mlp = $*;
+    # $* = 0;
 
     ### 1. run-hooks
     # compatible 
@@ -268,7 +268,7 @@ sub __EnvelopeFilter
 	}
     }
 
-    $* = $org_mlp;
+    # $* = $org_mlp;
 }
 
 # return 0 if reject;
