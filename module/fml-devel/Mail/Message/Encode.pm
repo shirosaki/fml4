@@ -185,7 +185,35 @@ sub _jp_str_ref
 {
     my ($self, $str_ref, $out_code, $in_code) = @_;
 
-    if ($out_code =~ /^(jis|sjis|euc)$|^(jis|sjis|euc)[-_]jp$/i) {
+    if ($out_code =~ /^(iso2022jp|iso-2022-jp|jis([-_]jp)?)$/i &&
+	     $in_code =~ /^(utf8|iso2022jp|iso-2022-jp|jis|sjis|euc)$|^(jis|sjis|euc)[-_]jp$/i ||
+	     $in_code =~ /^(iso2022jp|iso-2022-jp|jis([-_]jp)?)$/i &&
+	     $out_code =~ /^(utf8|iso2022jp|iso-2022-jp|jis|sjis|euc)$|^(jis|sjis|euc)[-_]jp$/i) {
+	use Encode;
+	use Encode::ISO2022JPMS;
+
+	if ($in_code =~ /^(iso2022jp|iso-2022-jp|jis([-_]jp)?)$/i) {
+	    $in_code = 'iso-2022-jp-ms';
+	}
+	if ($out_code =~ /^(iso2022jp|iso-2022-jp|jis([-_]jp)?)$/i) {
+	    $out_code = 'iso-2022-jp-ms';
+	}
+	if ($in_code =~ /^euc([-_]jp)?$/i) {
+	    $in_code = 'euc-jp';
+	}
+	if ($out_code =~ /^euc([-_]jp)?$/i) {
+	    $out_code = 'euc-jp';
+	}
+	if ($in_code =~ /^sjis([-_]jp)?$/i) {
+	    $in_code = 'shiftjis';
+	}
+	if ($out_code =~ /^sjis([-_]jp)?$/i) {
+	    $out_code = 'shiftjis';
+	}
+	Encode::from_to($$str_ref, $in_code, $out_code);
+	return 1;
+    }
+    elsif ($out_code =~ /^(jis|sjis|euc)$|^(jis|sjis|euc)[-_]jp$/i) {
 	my $code = $1 || $2;
 	$code    =~ tr/A-Z/a-z/;
 
@@ -503,7 +531,7 @@ sub decode_mime_string
 	# XXX Whereas, w3m looks to be able to read it ?
 	$str_out   =~ s/^\e\$\(B/\e\$B/; # make mule read this string.
 	$in_code   = $self->detect_code($str_out);
-	$out_code |= 'euc-jp'; # euc-jp by default.
+	$out_code ||= 'euc-jp'; # euc-jp by default.
     }
     else {
 	croak("Mail::Message::Encode: unknown language");
@@ -532,7 +560,7 @@ sub decode_base64_string
 	return $str if $@;
 
 	$in_code   = $self->detect_code($str_out);
-	$out_code |= 'euc-jp'; # euc-jp by default.
+	$out_code ||= 'euc-jp'; # euc-jp by default.
     }
     else {
 	croak("Mail::Message::Encode: unknown language");
@@ -560,7 +588,7 @@ sub decode_qp_string
 	return $str if $@;
 
 	$in_code   = $self->detect_code($str_out);
-	$out_code |= 'euc-jp'; # euc-jp by default.
+	$out_code ||= 'euc-jp'; # euc-jp by default.
     }
     else {
 	croak("Mail::Message::Encode: unknown language");

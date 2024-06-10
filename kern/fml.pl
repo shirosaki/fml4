@@ -862,7 +862,21 @@ sub FixHeaderFields
 	    }
 	    else { # e.g. Subject: [Elena:003] E.. U so ...;
 		print STDERR "IN: $_\n" if $debug;
-		$e{'h:Subject:'} = &StripBracket($_);
+		use Encode::MIME::Header;
+		use Jcode;
+		my $code, $tmpsubject;
+		# $e{'h:Subject:'} = &StripBracket($_);
+		$tmpsubject = Encode::decode('MIME-header', $_);
+		$code = getcode($tmpsubject);
+		if ($_ =~ /=\?utf-8\?/i) {
+		    $e{'h:Subject:'} = Encode::encode('MIME-header', &StripBracket($tmpsubject));
+		}
+		elsif ($code eq "ascii") {
+		    $e{'h:Subject:'} = &StripBracket($_);
+		}
+		else {
+		    $e{'h:Subject:'} = jcode(&StripBracket($tmpsubject))->mime_encode;
+		}
 		print STDERR "OUT: $e{'h:Subject:'}\n" if $debug;
 	    }
 	} 
